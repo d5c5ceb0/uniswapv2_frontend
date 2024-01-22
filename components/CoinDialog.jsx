@@ -12,7 +12,6 @@ import {
   Input,
   Link,
 } from "@nextui-org/react";
-//import CoinList from "./CoinList";
 import { FaAngleDown } from "react-icons/fa";
 import { Listbox, ListboxItem } from "@nextui-org/react";
 import { useSelector, useDispatch } from "react-redux";

@@ -1,5 +1,4 @@
-import Profile from "@/components/Profile";
-import Liquidity from "../../components/Liquidity";
+import Liquidity from "@/components/Liquidity";
 
 export default function Page({ children }) {
   return (

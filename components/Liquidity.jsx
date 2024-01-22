@@ -14,10 +14,10 @@ import {
   useBlockNumber,
 } from "wagmi";
 import { useReadContract } from "wagmi";
-import { erc20abi } from "../build/erc20abi";
-import { routerv2abi } from "../build/routerv2abi";
-import { factoryabi } from "../build/factoryabi";
-import { pairabi } from "@/build/pairabi";
+import { erc20abi } from "@/abis/erc20abi";
+import { routerv2abi } from "@/abis/routerv2abi";
+import { factoryabi } from "@/abis/factoryabi";
+import { pairabi } from "@/abis/pairabi";
 
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 //const UNI_Factory = "0xDfE5Ae33064D447c82013F19Fe22038F4107d7D6";
