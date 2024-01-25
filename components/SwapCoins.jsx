@@ -2,7 +2,7 @@
 import CoinDialog from "./CoinDialog";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setFromCoin, setToCoin } from "../app/lib/features/coins/coinsSlice";
+import { setFromCoin, setToCoin } from "@/lib/features/coins/coinsSlice";
 import { Button, CardBody, CardFooter, CardHeader } from "@nextui-org/react";
 import { Card, Input, Divider } from "@nextui-org/react";
 import { formatUnits } from "viem";
@@ -21,24 +21,29 @@ import { routerv2abi } from "@/abis/routerv2abi";
 import { factoryabi } from "@/abis/factoryabi";
 import { pairabi } from "@/abis/pairabi";
 
+const MAX_INT = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
-//const UNI_Factory = "0xDfE5Ae33064D447c82013F19Fe22038F4107d7D6";
-const UNI_Factory = "0x7E0987E5b3a30e3f2828572Bb659A548460a3003";
-const UNI_Router02 = "0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008";
 const WTH_ = "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9";
+const UNI_Factory = "0x503Ae30302bEdC7dF301e05eE464f1bFD20085C7";
+const UNI_Router02 = "0x440e24C674d2852CaAF58726335929e2e6Df276E";
+//external
+//const UNI_Factory = "0x7E0987E5b3a30e3f2828572Bb659A548460a3003";
+//const UNI_Router02 = "0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008";
 
 export default function SwapCoins() {
   const dispatch = useDispatch();
   const fromCoin = useSelector((state) => state.coins.fromCoin);
   const toCoin = useSelector((state) => state.coins.toCoin);
 
-  const [fromCoinAmt, setFromCoinAmt] = useState("0.0");
-  const [toCoinAmt, setToCoinAmt] = useState("0.0");
+  const [fromCoinAmt, setFromCoinAmt] = useState("");
+  const [toCoinAmt, setToCoinAmt] = useState("");
   const [balanceFrom, setBalanceFrom] = useState("0");
   const [balanceTo, setBalanceTo] = useState("0");
   const [currentPair, setCurrentPair] = useState(
     "0x0000000000000000000000000000000000000000"
   );
+  const [dir, setDir] = useState(0); //0 from-to; 1 to-from
+
   const { address, status, isConnected } = useAccount();
   const { data: blockNumber } = useBlockNumber({ watch: true });
 
@@ -88,18 +93,44 @@ export default function SwapCoins() {
     ],
   });
 
+  const { data: amountFrom, refetch: refetchAmountFrom } = useContractRead({
+    address: UNI_Router02,
+    abi: routerv2abi,
+    functionName: "getAmountIn",
+    args: [
+      toCoinAmt,
+      reserves ? (token0 === fromCoin.address ? reserves[0] : reserves[1]) : 0,
+      reserves ? (token0 === fromCoin.address ? reserves[1] : reserves[0]) : 0,
+    ],
+  });
+
+  const { data: allowanceFrom, refetch: refetchAllowanceFrom } =
+    useContractRead({
+      address: fromCoin.address,
+      abi: erc20abi,
+      functionName: "allowance",
+      args: [address, UNI_Router02],
+    });
+
   const { write: writeContract } = useContractWrite({
     address: UNI_Router02,
     abi: routerv2abi,
-    //functionName: "swapTokensForExactTokens",
-    functionName: "swapExactTokensForTokens",
+    functionName:
+      dir === 0 ? "swapExactTokensForTokens" : "swapTokensForExactTokens",
     args: [
-      fromCoinAmt * 1.5,
-      amountTo,
+      dir === 0 ? fromCoinAmt : toCoinAmt,
+      dir === 0 ? Math.floor(toCoinAmt * 0.95) : Math.floor(fromCoinAmt * 1.05),
       [fromCoin.address, toCoin.address],
       address,
-      1716809339,
+      3716809339,
     ],
+  });
+
+  const { write: allowFrom } = useContractWrite({
+    address: fromCoinAmt,
+    abi: erc20abi,
+    functionName: "approve",
+    args: [UNI_Router02, MAX_INT],
   });
 
   useEffect(() => {
@@ -123,10 +154,16 @@ export default function SwapCoins() {
   }, [balanceDataTo]);
 
   useEffect(() => {
-    if (amountTo) {
-      setToCoinAmt(amountTo.toString());
+    if (!dir) {
+      setToCoinAmt(amountTo?.toString());
     }
   }, [amountTo]);
+
+  useEffect(() => {
+    if (dir) {
+      setFromCoinAmt(amountFrom?.toString());
+    }
+  }, [amountFrom]);
 
   useEffect(() => {
     refetchFromBalance();
@@ -136,14 +173,29 @@ export default function SwapCoins() {
     refetchToken1();
     refetchReserves();
     refetchAmountTo();
+    refetchAmountFrom();
+    refetchAllowanceFrom();
   }, [blockNumber]);
 
   const handleSwap = () => {
     if (fromCoinAmt > 0) {
+      if (allowanceFrom.toString() < fromCoinAmt) {
+        allowFrom();
+      }
       writeContract();
-      setFromCoinAmt("0");
-      setToCoinAmt("0");
+      //setFromCoinAmt("0");
+      //setToCoinAmt("0");
     }
+  };
+
+  const handleFromInput = (v) => {
+    setFromCoinAmt(v);
+    setDir(0);
+  };
+
+  const handleToInput = (v) => {
+    setToCoinAmt(v);
+    setDir(1);
   };
 
   return (
@@ -160,10 +212,10 @@ export default function SwapCoins() {
                 <div className="flex-1">
                   <Input
                     type="text"
-                    placeholder="0.0"
+                    placeholder="0"
                     size="sm"
                     value={fromCoinAmt}
-                    onChange={(e) => setFromCoinAmt(e.target.value)}
+                    onChange={(e) => handleFromInput(e.target.value)}
                   />
                 </div>
                 <div>
@@ -180,10 +232,10 @@ export default function SwapCoins() {
                 <div className="flex-1">
                   <Input
                     type="text"
-                    placeholder="0.0"
+                    placeholder="0"
                     size="sm"
                     value={toCoinAmt}
-                    onChange={(e) => setToCoinAmt(e.target.value)}
+                    onChange={(e) => handleToInput(e.target.value)}
                   />
                 </div>
                 <div>

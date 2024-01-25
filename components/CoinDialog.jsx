@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   ModalContent,
@@ -15,22 +15,27 @@ import {
 import { FaAngleDown } from "react-icons/fa";
 import { Listbox, ListboxItem } from "@nextui-org/react";
 import { useSelector, useDispatch } from "react-redux";
+import {
+  useAccount,
+  useBalance,
+  useContractWrite,
+  useContractRead,
+  useBlockNumber,
+  useToken,
+} from "wagmi";
 
 const SEPOLIACoins = [
+  /*
   {
     name: "Ether",
     abbr: "ETH",
     address: "", // Weth address is fetched from the router
   },
-  {
-    name: "wbtc",
-    abbr: "WBTC",
-    address: "0x29f2D40B0605204364af54EC677bD022dA425d03",
-  },
+  */
   {
     name: "Tether USD",
     abbr: "USDT",
-    address: "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0",
+    address: "0x91364cC52331AB33de4C3AB63054d6B469242bD4",
   },
   {
     name: "my20token",
@@ -38,7 +43,7 @@ const SEPOLIACoins = [
     address: "0xf0636275361714540E5be5183a551f94c5ecc1e0",
   },
   {
-    name: "MTK",
+    name: "MyToken",
     abbr: "MTK",
     address: "0xFAf638da97163DeA7a1360a498295B04049b444b",
   },
@@ -46,11 +51,48 @@ const SEPOLIACoins = [
 
 export default function CoinDialog({ coin, setCoin }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [token, setToken] = useState("");
+  const [tokenList, setTokenList] = useState(SEPOLIACoins);
+
+  const { data: tokenInfo } = useToken({
+    address: token,
+  });
+
+  const handleTokenInput = (addr) => {
+    setToken(addr);
+  };
+
+  useEffect(() => {
+    if (tokenInfo?.symbol) {
+      if (
+        tokenList.filter((x) => x.address === tokenInfo?.address).length === 0
+      ) {
+        setTokenList(
+          [
+            ...tokenList,
+            { address: token, abbr: tokenInfo?.symbol, name: tokenInfo?.name },
+          ].filter((x) => x.address === token)
+        );
+      } else {
+        setTokenList(tokenList.filter((x) => x.address === token));
+      }
+    } else {
+      setTokenList(SEPOLIACoins);
+    }
+  }, [tokenInfo]);
 
   const onClicked = (token, close) => {
     setCoin(token);
+    setTokenList(SEPOLIACoins);
+    setToken("");
     close();
   };
+
+  const clearHandler = () => {
+    setToken("");
+    setTokenList(SEPOLIACoins);
+  };
+
   return (
     <>
       <Button onPress={onOpen} color="primary" radius="sm">
@@ -69,8 +111,12 @@ export default function CoinDialog({ coin, setCoin }) {
               <ModalBody>
                 <Input
                   autoFocus
+                  isClearable
                   placeholder="Paste Address"
                   variant="bordered"
+                  value={token}
+                  onChange={(e) => handleTokenInput(e.target.value)}
+                  onClear={() => clearHandler()}
                 />
                 <div className="border-t-1"></div>
                 <div className="w-full border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
@@ -78,7 +124,7 @@ export default function CoinDialog({ coin, setCoin }) {
                     variant="flat"
                     aria-label="Listbox menu with descriptions"
                   >
-                    {SEPOLIACoins.map((x) => {
+                    {tokenList.map((x) => {
                       return (
                         <ListboxItem
                           key={x.abbr}
@@ -95,9 +141,6 @@ export default function CoinDialog({ coin, setCoin }) {
               <ModalFooter>
                 <Button color="primary" onPress={onClose}>
                   Close
-                </Button>
-                <Button color="primary" onPress={onClose}>
-                  Ok
                 </Button>
               </ModalFooter>
             </>

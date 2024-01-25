@@ -20,7 +20,7 @@ import { configureChains, createConfig, sepolia, WagmiConfig } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, base, zora } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
-import store from "@/app/lib/store";
+import store from "@/lib/store";
 import { Provider } from "react-redux";
 
 const NEXT_PUBLIC_ENABLE_TESTNETS = "true";

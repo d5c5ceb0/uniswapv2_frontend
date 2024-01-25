@@ -7,9 +7,9 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-  Link,
   Button,
 } from "@nextui-org/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation.js";
 import clsx from "clsx";
 import { DiscordLogo } from "./DiscordLogo";
@@ -25,7 +25,12 @@ export default function Header() {
   return (
     <Navbar maxWidth="lg" height={"45px"} className="bg-[#15151d]">
       <NavbarBrand>
-        <DiscordLogo />
+        {/*<DiscordLogo />*/}
+        <Link href={"/"} color="primary">
+          <h1 className="text-white font-[600] text-[1.2rem]">
+            UniswapV2 for Sepolia
+          </h1>
+        </Link>
       </NavbarBrand>
       <NavbarContent className="flex gap-12" justify="start">
         {links.map((x, idx) => {
