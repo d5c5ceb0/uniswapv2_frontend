@@ -149,14 +149,14 @@ export default function Liquidity() {
     <Card>
       <CardBody>
         <Tabs>
-          <Tab key={"createPair"} title="Create Pair">
-            <CreatePair />
-          </Tab>
           <Tab key={"addLiquidity"} title="Add Liquidity">
             <AddLiquidity />
           </Tab>
           <Tab key={"removeLiquidity"} title="Remove Liquidity">
             <div className="text-center">comming soon</div>
+          </Tab>
+          <Tab key={"createPair"} title="Create Pair">
+            <CreatePair />
           </Tab>
         </Tabs>
       </CardBody>

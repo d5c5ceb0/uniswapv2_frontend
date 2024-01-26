@@ -222,9 +222,12 @@ export default function AddLiquidity() {
 
   return (
     <div>
-      <div className=" flex flex-col gap-7">
+      <div className=" flex flex-col gap-7 mt-5">
         <div className="bg-[#f0f0f0] h-[90px] w-4/5 m-auto  rounded-lg flex flex-col">
-          <div className="flex flex-row justify-center gap-3 items-center px-5 pt-4">
+          <div className="text-[0.6rem] text-start pl-5 py-1">
+            contract: {fromCoin.address}
+          </div>
+          <div className="flex flex-row justify-center gap-3 items-center px-5">
             <div className="flex-1">
               <Input
                 type="text"
@@ -244,7 +247,10 @@ export default function AddLiquidity() {
           <div className="text-end pr-5">balance: {balanceFrom}</div>
         </div>
         <div className="bg-[#f0f0f0] h-[90px] w-4/5 m-auto  rounded-lg flex flex-col">
-          <div className="flex flex-row justify-center gap-3 items-center px-5 pt-4">
+          <div className="text-[0.6rem] text-start pl-5 py-1">
+            contract: {toCoin.address}
+          </div>
+          <div className="flex flex-row justify-center gap-3 items-center px-5 ">
             <div className="flex-1">
               <Input
                 type="text"
@@ -265,7 +271,7 @@ export default function AddLiquidity() {
         </div>
       </div>
       <div className="my-5 w-4/5 m-auto text-start flex flex-col justify-start">
-        <div className="pb-5">初始兑换率和流动池份额</div>
+        <div className="pb-1 pt-3">Info: </div>
         <Divider />
         <div className="text-sm text-[#808080]">
           <div>* Pair:</div>
@@ -293,8 +299,12 @@ export default function AddLiquidity() {
             </div>
           )}
           <div>* Allowance</div>
-          <div>- Allowance from: {allowanceFrom?.toString()}</div>
-          <div>- Allowance to: {allowanceTo?.toString()}</div>
+          <div>
+            - Allowance ({fromCoin.abbr}): {allowanceFrom?.toString()}
+          </div>
+          <div>
+            - Allowance ({toCoin.abbr}): {allowanceTo?.toString()}
+          </div>
           <div>* LP:</div>
           <div>
             -{" "}
@@ -305,7 +315,7 @@ export default function AddLiquidity() {
         </div>
       </div>
       <Divider />
-      <div className="w-4/5 m-auto">
+      <div className="w-4/5 m-auto mt-3">
         <Button
           className="w-full h-[50px] font-bold rounded-md mb-5"
           color="primary"

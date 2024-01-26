@@ -254,9 +254,12 @@ export default function SwapCoins() {
         </CardHeader>
         <Divider />
         <CardBody>
-          <div className=" flex flex-col gap-7">
+          <div className=" flex flex-col gap-7 mt-5">
             <div className="bg-[#f0f0f0] h-[90px] w-4/5 m-auto  rounded-lg flex flex-col">
-              <div className="flex flex-row justify-center gap-3 items-center px-5 pt-4">
+              <div className="text-[0.6rem] text-start pl-5 py-1">
+                contract: {fromCoin.address}
+              </div>
+              <div className="flex flex-row justify-center gap-3 items-center px-5">
                 <div className="flex-1">
                   <Input
                     type="text"
@@ -276,7 +279,10 @@ export default function SwapCoins() {
               <div className="text-end pr-5">balance: {balanceFrom}</div>
             </div>
             <div className="bg-[#f0f0f0] h-[90px] w-4/5 m-auto  rounded-lg flex flex-col">
-              <div className="flex flex-row justify-center gap-3 items-center px-5 pt-4">
+              <div className="text-[0.6rem] text-start pl-5 py-1">
+                contract: {fromCoin.address}
+              </div>
+              <div className="flex flex-row justify-center gap-3 items-center px-5">
                 <div className="flex-1">
                   <Input
                     type="text"
@@ -307,25 +313,32 @@ export default function SwapCoins() {
             </div>
             <Divider />
             <div className="text-sm text-[#808080]">
-              * Pair: {currentPair}
-              <div>Allowance: {allowanceFrom?.toString()}</div>
+              <div>* Pair: {currentPair}</div>
+              {/*
+              <div>
+                * Allowance ({fromCoin.abbr}): {allowanceFrom?.toString() || ""}
+              </div> */}
               <div>* Reserves</div>
-              {reserves && (
-                <div>
-                  {fromCoin.abbr}:{" "}
-                  {token0 === fromCoin.address
-                    ? formatUnits(reserves[0], balanceDataFrom.decimals)
-                    : formatUnits(reserves[1], balanceDataFrom.decimals)}
-                </div>
-              )}
-              {reserves && (
-                <div>
-                  {toCoin.abbr}:{" "}
-                  {token0 === toCoin.address
-                    ? formatUnits(reserves[0], balanceDataFrom.decimals)
-                    : formatUnits(reserves[1], balanceDataFrom.decimals)}
-                </div>
-              )}
+              <div>
+                {reserves && (
+                  <div>
+                    - {fromCoin.abbr}:{" "}
+                    {token0 === fromCoin.address
+                      ? formatUnits(reserves[0], balanceDataFrom.decimals)
+                      : formatUnits(reserves[1], balanceDataFrom.decimals)}
+                  </div>
+                )}
+              </div>
+              <div>
+                {reserves && (
+                  <div>
+                    - {toCoin.abbr}:{" "}
+                    {token0 === toCoin.address
+                      ? formatUnits(reserves[0], balanceDataFrom.decimals)
+                      : formatUnits(reserves[1], balanceDataFrom.decimals)}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </CardBody>

@@ -128,7 +128,14 @@ export default function CoinDialog({ coin, setCoin }) {
                       return (
                         <ListboxItem
                           key={x.abbr}
-                          description={x.abbr}
+                          description={
+                            <div>
+                              {x.abbr}
+                              <span className="text-[0.5rem] ml-3">
+                                {x.address}
+                              </span>
+                            </div>
+                          }
                           onClick={() => onClicked(x, onClose)}
                         >
                           {x.name}
