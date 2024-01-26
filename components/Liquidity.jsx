@@ -155,7 +155,9 @@ export default function Liquidity() {
           <Tab key={"addLiquidity"} title="Add Liquidity">
             <AddLiquidity />
           </Tab>
-          <Tab key={"removeLiquidity"} title="Remove Liquidity"></Tab>
+          <Tab key={"removeLiquidity"} title="Remove Liquidity">
+            <div className="text-center">comming soon</div>
+          </Tab>
         </Tabs>
       </CardBody>
     </Card>

@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setFromCoin, setToCoin } from "@/lib/features/coins/coinsSlice";
 import { Button, CardBody, CardFooter, CardHeader } from "@nextui-org/react";
 import { Tabs, Tab, Card, Input, Divider } from "@nextui-org/react";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import {
   useAccount,
   useBalance,
@@ -20,6 +20,7 @@ import { factoryabi } from "@/abis/factoryabi";
 import { pairabi } from "@/abis/pairabi";
 import CreatePair from "./CreatePair";
 
+const MAX_INT = 0xffffffffffffffffffff;
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 const WTH_ = "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9";
 const UNI_Factory = "0x503Ae30302bEdC7dF301e05eE464f1bFD20085C7";
@@ -50,6 +51,11 @@ export default function AddLiquidity() {
   const { data: balanceDataTo, refetch: refetchToBalance } = useBalance({
     address: address,
     token: toCoin.address,
+  });
+
+  const { data: balanceDataPair, refetch: refetchPairBalance } = useBalance({
+    address: address,
+    token: currentPair,
   });
 
   const { data: pair, refetch: refetchPair } = useContractRead({
@@ -85,6 +91,21 @@ export default function AddLiquidity() {
     args: [fromCoinAmt, reserves?.[0], reserves?.[1]],
   });
   */
+
+  const { data: allowanceFrom, refetch: refetchAllowanceFrom } =
+    useContractRead({
+      address: fromCoin.address,
+      abi: erc20abi,
+      functionName: "allowance",
+      args: [address, UNI_Router02],
+    });
+
+  const { data: allowanceTo, refetch: refetchAllowanceTo } = useContractRead({
+    address: toCoin.address,
+    abi: erc20abi,
+    functionName: "allowance",
+    args: [address, UNI_Router02],
+  });
 
   useEffect(() => {
     setCurrentPair(pair);
@@ -129,20 +150,23 @@ export default function AddLiquidity() {
   useEffect(() => {
     refetchFromBalance();
     refetchToBalance();
+    refetchPairBalance();
     refetchPair();
     refetchToken0();
     refetchToken1();
     refetchReserves();
     //refetchQuote();
+    refetchAllowanceFrom();
+    refetchAllowanceTo();
   }, [blockNumber]);
 
   const handleFromInput = (v) => {
-    setFromCoinAmt(v);
+    setFromCoinAmt(v ? parseUnits(v, 18).toString() : "");
     setDir(0);
   };
 
   const handleToInput = (v) => {
-    setToCoinAmt(v);
+    setToCoinAmt(v ? parseUnits(v, 18).toString() : "");
     setDir(1);
   };
 
@@ -155,15 +179,45 @@ export default function AddLiquidity() {
       toCoin.address,
       fromCoinAmt,
       toCoinAmt,
-      !dir ? fromCoinAmt : 0,
-      !dir ? 0 : toCoinAmt,
+      0,
+      0,
       address,
       3716809339,
     ],
+    onSettled(data) {
+      setFromCoinAmt("");
+      setToCoinAmt("");
+    },
+  });
+
+  const { write: allowFrom } = useContractWrite({
+    address: fromCoin.address,
+    abi: erc20abi,
+    functionName: "approve",
+    args: [UNI_Router02, MAX_INT],
+  });
+
+  const { write: allowTo } = useContractWrite({
+    address: toCoin.address,
+    abi: erc20abi,
+    functionName: "approve",
+    args: [UNI_Router02, MAX_INT],
   });
 
   const handleAddLiquidity = () => {
-    writeContract();
+    if (allowanceFrom.toString() < fromCoinAmt) {
+      allowFrom();
+    }
+    if (allowanceTo.toString() < toCoinAmt) {
+      allowTo();
+    }
+
+    if (
+      allowanceFrom.toString() >= fromCoinAmt &&
+      allowanceTo.toString() >= toCoinAmt
+    ) {
+      writeContract();
+    }
   };
 
   return (
@@ -176,7 +230,7 @@ export default function AddLiquidity() {
                 type="text"
                 placeholder="0.0"
                 size="sm"
-                value={fromCoinAmt}
+                value={fromCoinAmt ? formatUnits(fromCoinAmt, 18) : ""}
                 onChange={(e) => handleFromInput(e.target.value)}
               />
             </div>
@@ -196,7 +250,7 @@ export default function AddLiquidity() {
                 type="text"
                 placeholder="0.0"
                 size="sm"
-                value={toCoinAmt}
+                value={toCoinAmt ? formatUnits(toCoinAmt, 18) : ""}
                 onChange={(e) => handleToInput(e.target.value)}
               />
             </div>
@@ -214,27 +268,40 @@ export default function AddLiquidity() {
         <div className="pb-5">初始兑换率和流动池份额</div>
         <Divider />
         <div className="text-sm text-[#808080]">
-          * Pair:
-          {currentPair === "0x0000000000000000000000000000000000000000"
-            ? "not created"
-            : currentPair}
+          <div>* Pair:</div>
+          <div>
+            -{" "}
+            {currentPair === "0x0000000000000000000000000000000000000000"
+              ? "not created"
+              : currentPair}
+          </div>
           <div>* Reserves</div>
           {reserves && (
             <div>
-              {fromCoin.abbr}:
+              - {fromCoin.abbr}:
               {token0 === fromCoin.address
-                ? formatUnits(reserves[0], balanceDataFrom.decimals)
-                : formatUnits(reserves[1], balanceDataFrom.decimals)}
+                ? formatUnits(reserves[0], 18)
+                : formatUnits(reserves[1], 18)}
             </div>
           )}
           {reserves && (
             <div>
-              {toCoin.abbr}:{" "}
+              - {toCoin.abbr}:{" "}
               {token0 === toCoin.address
-                ? formatUnits(reserves[0], balanceDataFrom.decimals)
-                : formatUnits(reserves[1], balanceDataFrom.decimals)}
+                ? formatUnits(reserves[0], 18)
+                : formatUnits(reserves[1], 18)}
             </div>
           )}
+          <div>* Allowance</div>
+          <div>- Allowance from: {allowanceFrom?.toString()}</div>
+          <div>- Allowance to: {allowanceTo?.toString()}</div>
+          <div>* LP:</div>
+          <div>
+            -{" "}
+            {balanceDataPair?.value && balanceDataPair?.decimals
+              ? formatUnits(balanceDataPair.value, balanceDataPair.decimals)
+              : "0"}
+          </div>
         </div>
       </div>
       <Divider />
@@ -244,7 +311,10 @@ export default function AddLiquidity() {
           color="primary"
           onClick={() => handleAddLiquidity()}
         >
-          Add Liquidity
+          {allowanceFrom?.toString() < fromCoinAmt ||
+          allowanceTo?.toString() < toCoinAmt
+            ? "Approval to AddLiquidity"
+            : "Add Liquidity"}
         </Button>
       </div>
     </div>
