@@ -115,7 +115,7 @@ export default function SwapCoins() {
       dir === 0 ? Math.floor(toCoinAmt * 0.95) : Math.floor(fromCoinAmt * 1.05),
       [fromCoin.address, toCoin.address],
       address,
-      3716809339,
+      Math.floor(Date.now() / 1000) + 200000,
     ],
     onSettled(data) {
       setFromCoinAmt("");
@@ -280,7 +280,7 @@ export default function SwapCoins() {
             </div>
             <div className="bg-[#f0f0f0] h-[90px] w-4/5 m-auto  rounded-lg flex flex-col">
               <div className="text-[0.6rem] text-start pl-5 py-1">
-                contract: {fromCoin.address}
+                contract: {toCoin.address}
               </div>
               <div className="flex flex-row justify-center gap-3 items-center px-5">
                 <div className="flex-1">

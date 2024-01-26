@@ -19,6 +19,7 @@ import { routerv2abi } from "@/abis/routerv2abi";
 import { factoryabi } from "@/abis/factoryabi";
 import { pairabi } from "@/abis/pairabi";
 import CreatePair from "./CreatePair";
+import RemoveLiquidity from "./RemoveLiquidity";
 
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 //const UNI_Factory = "0x7E0987E5b3a30e3f2828572Bb659A548460a3003";
@@ -153,7 +154,7 @@ export default function Liquidity() {
             <AddLiquidity />
           </Tab>
           <Tab key={"removeLiquidity"} title="Remove Liquidity">
-            <div className="text-center">comming soon</div>
+            <RemoveLiquidity />
           </Tab>
           <Tab key={"createPair"} title="Create Pair">
             <CreatePair />

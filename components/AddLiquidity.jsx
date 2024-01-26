@@ -182,7 +182,7 @@ export default function AddLiquidity() {
       0,
       0,
       address,
-      3716809339,
+      Math.floor(Date.now() / 1000) + 200000,
     ],
     onSettled(data) {
       setFromCoinAmt("");
