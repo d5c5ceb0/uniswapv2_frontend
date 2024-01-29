@@ -228,7 +228,7 @@ export default function SwapCoins() {
 
   const handleSwap = () => {
     if (fromCoinAmt > 0) {
-      if (allowanceFrom.toString() < fromCoinAmt) {
+      if (allowanceFrom < fromCoinAmt) {
         allowFrom();
       } else {
         writeContract();
@@ -350,9 +350,7 @@ export default function SwapCoins() {
               color="primary"
               onClick={() => handleSwap()}
             >
-              {allowanceFrom?.toString() < fromCoinAmt
-                ? "Approval to Swap"
-                : "Swap"}
+              {allowanceFrom < fromCoinAmt ? "Approval to Swap" : "Swap"}
             </Button>
           </div>
         </CardFooter>

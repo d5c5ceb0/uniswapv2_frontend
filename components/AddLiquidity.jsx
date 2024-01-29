@@ -210,17 +210,14 @@ export default function AddLiquidity() {
   });
 
   const handleAddLiquidity = () => {
-    if (allowanceFrom.toString() < fromCoinAmt) {
+    if (allowanceFrom < fromCoinAmt) {
       allowFrom();
     }
-    if (allowanceTo.toString() < toCoinAmt) {
+    if (allowanceTo < toCoinAmt) {
       allowTo();
     }
 
-    if (
-      allowanceFrom.toString() >= fromCoinAmt &&
-      allowanceTo.toString() >= toCoinAmt
-    ) {
+    if (allowanceFrom >= fromCoinAmt && allowanceTo >= toCoinAmt) {
       writeContract();
     }
   };
@@ -326,8 +323,7 @@ export default function AddLiquidity() {
           color="primary"
           onClick={() => handleAddLiquidity()}
         >
-          {allowanceFrom?.toString() < fromCoinAmt ||
-          allowanceTo?.toString() < toCoinAmt
+          {allowanceFrom < fromCoinAmt || allowanceTo < toCoinAmt
             ? "Approval to AddLiquidity"
             : "Add Liquidity"}
         </Button>
