@@ -131,9 +131,11 @@ export default function AddLiquidity() {
     if (!dir && reserves) {
       const [f, t] =
         token0 === fromCoin.address
-          ? [reserves?.[0].toString(), reserves?.[1].toString()]
-          : [reserves?.[1].toString(), reserves?.[0].toString()];
-      setToCoinAmt(Math.floor((fromCoinAmt * t) / f));
+          ? [reserves[0].toString(), reserves[1].toString()]
+          : [reserves[1].toString(), reserves[0].toString()];
+      if (reserves[0] != 0 && reserves[1] != 0) {
+        setToCoinAmt(Math.floor((fromCoinAmt * t) / f));
+      }
     }
   }, [fromCoinAmt, reserves]);
 
@@ -141,9 +143,12 @@ export default function AddLiquidity() {
     if (dir && reserves) {
       const [f, t] =
         token0 === fromCoin.address
-          ? [reserves?.[0].toString(), reserves?.[1].toString()]
-          : [reserves?.[1].toString(), reserves?.[0].toString()];
-      setFromCoinAmt(Math.floor((toCoinAmt * f) / t));
+          ? [reserves[0].toString(), reserves[1].toString()]
+          : [reserves[1].toString(), reserves[0].toString()];
+
+      if (reserves[0] != 0 && reserves[1] != 0) {
+        setFromCoinAmt(Math.floor((toCoinAmt * f) / t));
+      }
     }
   }, [toCoinAmt, reserves]);
 
