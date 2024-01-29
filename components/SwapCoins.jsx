@@ -324,8 +324,8 @@ export default function SwapCoins() {
                   <div>
                     - {fromCoin.abbr}:{" "}
                     {token0 === fromCoin.address
-                      ? formatUnits(reserves[0], balanceDataFrom.decimals)
-                      : formatUnits(reserves[1], balanceDataFrom.decimals)}
+                      ? formatUnits(reserves[0], 18)
+                      : formatUnits(reserves[1], 18)}
                   </div>
                 )}
               </div>
@@ -334,8 +334,8 @@ export default function SwapCoins() {
                   <div>
                     - {toCoin.abbr}:{" "}
                     {token0 === toCoin.address
-                      ? formatUnits(reserves[0], balanceDataFrom.decimals)
-                      : formatUnits(reserves[1], balanceDataFrom.decimals)}
+                      ? formatUnits(reserves[0], 18)
+                      : formatUnits(reserves[1], 18)}
                   </div>
                 )}
               </div>
